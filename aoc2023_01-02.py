@@ -27,31 +27,32 @@ def replace_with_number(match):
     word = match.group(0)
     return digit_words.get(word, "")
 
+def reversed_replace_with_number(match):
+    word = match.group(0)
+    return digit_words.get(word[::-1], "")
+
 pattern = '|'.join(re.escape(word) for word in digit_words.keys())
 
-def replace_first_and_last_digit_words(s):
-    # Find all occurrences of digit words
-    matches = list(re.finditer(pattern, s))
-    
-    print(re.findall(pattern, s))
-    
-    if not matches:
+def replace_first_and_last_digit_words(s): 
+    # if no matches   
+    match = list(re.finditer(pattern, s))
+    if not match:
         return s  # No replacement needed
 
-    # Replace the first occurrence
-    first_match = matches[0]
-    s = s[:first_match.start()] + replace_with_number(first_match) + s[first_match.end():]
+    # replace first occurence only if there were no numbers before it; in case there ere numbers,
+    # we need to skip this step
+    if not re.search('\d+', s[:match[0].start()]):
+      s = re.sub(pattern, replace_with_number,s, count=1)
 
-    # Find all occurrences again as the string has changed
-    matches = list(re.finditer(pattern, s))
-    print(re.findall(pattern, s))
+    # need to reverse string and replace the most rightmost occurence
+    string_reversed = s[::-1]
+    pattern_reversed = pattern[::-1]
 
-    if len(matches) > 1:
-        # Replace the last occurrence if it's different from the first
-        last_match = matches[-1]
-        s = s[:last_match.start()] + replace_with_number(last_match) + s[last_match.end():]
+    # Replace the first (leftmost) occurrence in the reversed string
+    replaced_reversed = re.sub(pattern_reversed, reversed_replace_with_number, string_reversed, count=1)
+
+    return replaced_reversed[::-1]
     
-    return s
 
 def main():
     line_number = 0
